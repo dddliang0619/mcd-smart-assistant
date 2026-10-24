@@ -26,6 +26,8 @@ for (const file of ['package.json', 'project.config.json', '.env.example', 'READ
 }
 for (const file of ['server/catalog.mjs', 'server/recommend.mjs', 'server/demo-prices.mjs', 'server/data/guangzhou-catalog.json']) check(file, '广州产品配餐模块');
 check('server/integration.mjs', '麦当劳官方MCP接入模块');
+check('server/default-meal.mjs', '官方默认套餐核价模块');
+check('start-live.cmd', 'Windows真实模式启动入口');
 
 const pkg = readJson('package.json');
 if (pkg) {

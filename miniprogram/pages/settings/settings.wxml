@@ -23,6 +23,7 @@
   <view class="card" wx:if="{{integration}}">
     <view class="card-title">麦当劳官方接入</view>
     <view>{{integration.summary}}</view>
+    <view class="muted" wx:if="{{integration.aiConfigured}}">AI 服务：{{integration.aiHost}} · {{integration.aiModel}}</view>
     <view class="muted">下一步：{{integration.nextStep}}</view>
     <view class="row" wx:for="{{integration.features}}" wx:key="id"><text>{{item.name}}</text><text class="muted">{{item.statusText}}</text></view>
     <view class="muted">{{integration.notice}}</view>

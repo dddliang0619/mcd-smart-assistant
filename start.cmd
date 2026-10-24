@@ -25,10 +25,20 @@ echo [i] Backend  : http://127.0.0.1:8787
 echo [i] Keep this window OPEN. Closing it stops the server.
 echo.
 
+set "ORDER_PROXY_ARGS="
+if exist ".runtime\network.env" (
+  "%NODE%" --help | findstr /C:"--use-env-proxy" >nul
+  if errorlevel 1 (
+    echo [x] Local proxy profile requires Node.js with --use-env-proxy support.
+    exit /b 1
+  )
+  set "ORDER_PROXY_ARGS=--use-env-proxy --env-file-if-exists=.runtime/network.env"
+)
+
 rem Give the server two seconds before the browser opens.
 if /i not "%~1"=="nobrowser" start "" /min powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2; Start-Process 'http://127.0.0.1:8787/'"
 
-"%NODE%" --env-file-if-exists=.env server/index.mjs
+"%NODE%" --env-file-if-exists=.env %ORDER_PROXY_ARGS% server/index.mjs
 
 echo.
 echo [x] Server stopped.

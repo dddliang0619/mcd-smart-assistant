@@ -24,8 +24,9 @@ export function integrationStatus(config, verification = null) {
     demo_configured: 'MCP 凭证已配置 · 等待连接核验', demo_connected: '官方 MCP 已核验 · 配餐仍为演示模式', demo_partial: '官方 MCP 部分接口未开放 · 配餐仍为演示模式',
     ready: '官方 MCP 工具清单已核验', partial: '官方 MCP 已连接 · 部分接口未开放' }[state];
   return { provider: '麦当劳官方 MCP', state, summary, mode: config.mode, mcpConfigured, aiConfigured,
+    aiHost: config.aiBaseUrl ? new URL(config.aiBaseUrl).hostname : '', aiModel: config.aiModel || '',
     upstreamChecked: checked, checkedAt: verification?.checkedAt || null, features,
     missing: checked ? features.flatMap(f => f.tools.filter(name => !names.has(name))) : [],
-    nextStep: !mcpConfigured ? '配置麦当劳 MCP 凭证' : !checked ? '检查官方 MCP 接入' : !aiConfigured ? '配置 DeepSeek 等 AI 服务密钥，验证后启用真实配餐' : config.mode === 'demo' ? '切换真实模式并验证 AI 配餐' : '可查询门店并逐份官方核价',
+    nextStep: !mcpConfigured ? '配置麦当劳 MCP 凭证' : !checked ? '检查官方 MCP 接入' : !aiConfigured ? '配置 AI 服务密钥，验证后启用真实配餐' : config.mode === 'demo' ? '切换真实模式并验证 AI 配餐' : '生成方案时验证 AI 响应与官方核价',
     notice: '工具清单核验不代表已取得当前门店菜单或价格。真实方案逐份调用官方计价；仅覆盖官方接口对当前账号、门店和时段开放的数据。' };
 }

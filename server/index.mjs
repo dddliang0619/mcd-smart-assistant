@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AppError, equalSecret, OrderService } from './domain.mjs';
@@ -12,6 +13,16 @@ import { integrationStatus } from './integration.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 export function loadConfig(env = process.env) {
+  // Keep the locally selected provider separate from an open .env editor's autosave.
+  // Explicit env objects used by tests and integrations remain isolated from local secrets.
+  const providerFile = join(root, '.runtime', 'ai-provider.json');
+  if (env === process.env && existsSync(providerFile)) {
+    let provider;
+    try { provider = JSON.parse(readFileSync(providerFile, 'utf8')); }
+    catch { throw new Error('本机 AI 连接配置无法读取，请检查 .runtime/ai-provider.json。'); }
+    if (!provider || ['baseUrl', 'model', 'apiKey'].some(k => typeof provider[k] !== 'string' || !provider[k].trim())) throw new Error('本机 AI 连接配置需填写 baseUrl、model 和 apiKey。');
+    env = { ...env, AI_BASE_URL: provider.baseUrl, AI_MODEL: provider.model, AI_API_KEY: provider.apiKey, AI_REASONING_EFFORT: provider.reasoningEffort || env.AI_REASONING_EFFORT };
+  }
   const mode = env.APP_MODE || 'demo';
   if (!['demo', 'live'].includes(mode)) throw new Error('APP_MODE 必须是 demo 或 live。');
   const accessKey = env.APP_ACCESS_KEY || 'demo-local-only';
@@ -21,8 +32,10 @@ export function loadConfig(env = process.env) {
   const parsed = new URL(aiBaseUrl);
   if (parsed.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(parsed.hostname)) throw new Error('AI 服务地址必须使用 HTTPS。');
   const port = Number(env.PORT || 8787);
+  const aiReasoningEffort = env.AI_REASONING_EFFORT || undefined;
+  if (aiReasoningEffort && !['low', 'medium', 'high'].includes(aiReasoningEffort)) throw new Error('AI_REASONING_EFFORT 需为 low、medium 或 high，未适配的服务请留空。');
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT 无效。');
-  return { mode, accessKey, host: env.HOST || '127.0.0.1', port, mcdToken: env.MCD_MCP_TOKEN, aiBaseUrl, aiModel: env.AI_MODEL || 'deepseek-flash', aiKey: env.AI_API_KEY };
+  return { mode, accessKey, host: env.HOST || '127.0.0.1', port, mcdToken: env.MCD_MCP_TOKEN, aiBaseUrl, aiModel: env.AI_MODEL || 'deepseek-flash', aiKey: env.AI_API_KEY, aiReasoningEffort };
 }
 function send(res, status, data) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });

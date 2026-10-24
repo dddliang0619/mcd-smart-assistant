@@ -11,6 +11,7 @@
 - 按总预算、人数、餐段和常见口味条件推荐 1–5 种不同组合，支持换一批。
 - 内置广州 104 款餐品、147 条规格参考资料，保留来源、采集日期及缺失值。
 - 真实模式查询官方门店、套餐详情、已有优惠和实际总价；本地参考 ID 不能用于官方下单。
+- 无替换要求的套餐可按官方默认子项快捷核价，默认项不完整时停止，不猜选项。
 - 确认下单前再次核价；报价变化后重新确认；重复确认复用原记录，提交结果不明时停止自动重试。
 - Skill 和小程序都能查询连接状态、报价和订单；付款由用户在官方渠道完成。
 
@@ -66,13 +67,19 @@ node --env-file-if-exists=.env scripts/skill.mjs plan --input examples/plan.json
 3. 配置 `AI_BASE_URL` 和 `AI_MODEL`。默认适配 DeepSeek 的 Chat Completions 工具调用格式；其他服务需支持兼容协议和工具调用。
 4. 设置 `APP_MODE=live` 后重启。先运行 `check`，再用真实位置生成方案验证菜单与计价。
 
+Windows 也可使用 `start-live.cmd` 启动真实模式；同一端口只运行一个后端。配置变更需重启后端，旧进程不会自动加载新 Key。真实模式遇到限流、超时或网关错误会明确报错，不回退模拟价。
+
+本机可选配置 `.runtime/ai-provider.json` 的 `baseUrl`、`model`、`apiKey` 三个非空字段会优先于 `.env` 中的 AI 设置；该文件只在后端本地读取，不会上传。`reasoningEffort` 或环境变量 `AI_REASONING_EFFORT` 可设为 `low`、`medium`、`high`，仅在已验证服务接受该参数时填写，默认不发送。
+
+若需要让 Node 沿用本机已有代理，可在私有的 `.runtime/network.env` 设置 `HTTPS_PROXY`、`HTTP_PROXY` 和 `NO_PROXY`。Windows 启动脚本发现该文件时才启用 `--use-env-proxy`，需要支持此参数的 Node 版本；普通运行仍使用 Node.js 22.15+。此配置不改变系统网络设置。
+
 ```bash
 node --env-file-if-exists=.env scripts/skill.mjs check
 ```
 
 [`mcp-config.example.json`](mcp-config.example.json) 是客户端直连 MCP 的脱敏示例，`${MCD_MCP_TOKEN}` 为环境变量占位符。各客户端的变量插值语法可能不同，需要按客户端配置；后端直接读取 `.env`，不加载此示例文件。
 
-**当前验证情况（2026-10-24）：** 已使用本机个人凭证完成官方 MCP 会话初始化，读取到 35 个工具，并成功调用只读的 `now-time-info`。本机 AI 密钥尚未配置；真实 AI 配餐、官方计价和创建订单未在本次打包中完成端到端实测。自动化测试中的真实模式使用模拟 MCP/AI，不能代替线上验证。公开仓库只包含脱敏配置。
+**当前验证情况（2026-10-24）：** 已使用本机个人凭证完成官方 MCP 会话初始化，读取到 35 个工具，并成功调用只读的 `now-time-info`。开发环境现已提供本机 AI 连接配置；配置存在不代表运行进程已加载，也不代表真实配餐已成功。真实 AI 配餐、官方计价和创建订单尚未在本次发布中完成端到端验证。自动化测试中的真实模式使用模拟 MCP/AI，不能代替线上验证。公开仓库只包含通用接入代码及脱敏配置，不含个人 Key 或本机服务商设置。
 
 实际工具、调用流程和业务价值见 [`MCP_INTEGRATION.md`](MCP_INTEGRATION.md)。
 
@@ -108,6 +115,8 @@ mcp-config.example.json        脱敏 MCP 配置
 npm run check
 npm test
 ```
+
+如需自行核验真实配餐，可配置个人凭证和 `SMOKE_LOCATION`（公共地标或门店位置），运行 `node --env-file-if-exists=.env scripts/smoke-live.mjs`。`SMOKE_BUDGET` 可选，默认 40 元；脚本只允许查询和计价，不开放下单工具。该检查会调用真实 AI 服务并产生相应调用用量，结果保存在被忽略的 `.runtime/` 中。若需代理，应另加本机网络环境文件和 `--use-env-proxy` 参数。
 
 测试不会真实创建订单。`.env`、本机配置、`.runtime/`、日志及订单数据均已排除。未提供 `workbuddy.md`：未核验的 WorkBuddy 开发经历不作声明。
 

@@ -12,7 +12,8 @@ description: 根据人数、总预算和口味推荐麦当劳餐品，查询小�
 需要 Node.js 22.15+。先运行 `node --env-file-if-exists=.env scripts/skill.mjs health`，读取 `mode` 和 `integration`。没有后端时，参考 [README.md](README.md) 启动随附服务；不要覆盖用户已有的配置或启动第二个相同端口的服务。
 
 - 演示模式不需要密钥，所有价格和订单必须明确称为“模拟”，不能声称查询到了门店实时价格。
-- 真实模式需要后端 `.env` 中的 `MCD_MCP_TOKEN`、`AI_API_KEY` 和随机 `APP_ACCESS_KEY`。不要让用户把密钥贴进聊天或提交到仓库。
+- 真实模式需要后端的 `MCD_MCP_TOKEN`、AI 连接配置和随机 `APP_ACCESS_KEY`。AI 可从 `.env` 读取，也可从本机 `.runtime/ai-provider.json` 读取；本机配置优先。不要让用户把密钥贴进聊天或提交到仓库。
+- 配置文件更新后需重启后端才会生效。区分“配置文件存在”和运行中 `health` 的 `aiConfigured`；不得把已有 Key 等同于已通过真实配餐验证。Windows 可用 `start-live.cmd` 启动真实模式；不要仅为检查连接擅自切换用户的运行模式。
 - `check` 核验 MCP 工具清单；它不证明实时菜单、报价或下单已成功。真实配餐仍需 `plan` 的实际返回结果。
 
 ## 配餐与查询
@@ -28,6 +29,8 @@ node --env-file-if-exists=.env scripts/skill.mjs plan --input request.json
 示例请求见 [examples/plan.json](examples/plan.json)。用户未指定的硬性条件不要自行补充。展示返回的方案名称、门店、餐品数量、总价、配送费、优惠和取餐方式；以 `quotes` 数组为准，记录用户选中的 `id`。遇到问题返回或没有报价时解释缺少的信息，不编造餐品卡片。
 
 `catalog` 是 2026-10-24 采集的广州参考资料，不等于当前门店在售菜单；未知营养值保持未知。口味、原料和过敏原推断不能作为严格饮食保证；真实模式尚不能保证逐规格热量限制。官方套餐组成、商品编码与价格以 MCP 返回为准，不承诺全局最低价。
+
+真实模式的后端会用本地只读工具 `price_default_meal` 快捷核价普通套餐，仅使用官方明确标记的默认子项。它不是官方 MCP Tool，也不满足用户指定的替换或特调要求；有此类要求时必须按完整详情匹配。AI 限流、超时或网关错误时说明查询未完成，不回退成模拟价格来冒充真实报价。
 
 ## 用户确认后下单
 
