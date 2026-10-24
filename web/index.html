@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>点餐小助手 · 电脑调试页</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<header>
+  <h1>点餐小助手</h1>
+  <p class="sub">电脑上的调试页。手机上用微信小程序，这里只用来快速验证后端。</p>
+  <p id="health" class="health">正在检查后端…</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>连接</h2>
+    <label>访问口令（.env 里的 APP_ACCESS_KEY）
+      <input id="key" type="password" placeholder="demo-local-only" autocomplete="off" />
+    </label>
+    <div class="buttons">
+      <button id="save">保存到本机</button>
+      <button id="check" class="ghost">检查点餐接口</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>需求</h2>
+    <label>想吃什么，直接说
+      <textarea id="text" rows="4" placeholder="一个人吃，30元以内，不吃辣，要汉堡和无糖饮料，在附近门店自取。"></textarea>
+    </label>
+    <div class="grid">
+      <label>就餐方式
+        <select id="fulfillment">
+          <option value="pickup">到店自取</option>
+          <option value="delivery">外送</option>
+        </select>
+      </label>
+      <label>位置
+        <input id="location" type="text" placeholder="城市 + 附近地标" />
+      </label>
+      <label>预算上限（元，可留空）
+        <input id="budget" type="number" min="0" max="2000" step="0.01" placeholder="30" />
+      </label>
+      <label>用餐人数（1–8人，可留空自动识别）
+        <input id="people" type="number" min="1" max="8" step="1" placeholder="默认1人" />
+      </label>
+    </div>
+    <div class="buttons budget-options" aria-label="快捷预算">
+      <button class="ghost" data-budget="15">¥15</button><button class="ghost" data-budget="20">¥20</button>
+      <button class="ghost" data-budget="30">¥30</button><button class="ghost" data-budget="50">¥50</button>
+      <button class="ghost" data-budget="80">¥80</button>
+    </div>
+    <div class="buttons">
+      <button id="plan">帮我配餐</button>
+      <button id="reload" class="ghost">刷新订单列表</button>
+    </div>
+    <pre id="answer" class="answer" hidden></pre>
+  </section>
+
+  <section class="panel" id="optionsPanel" hidden>
+    <h2>比较多种搭配</h2>
+    <p id="optionsNotice" class="note"></p>
+    <div id="options"></div>
+  </section>
+
+  <section class="panel" id="quotePanel" hidden>
+    <h2>核对方案</h2>
+    <div id="quoteBody"></div>
+    <div class="buttons">
+      <button id="confirm">确认下单</button>
+    </div>
+    <p class="note">确认只提交报价编号，金额和餐品以服务端保存的方案为准。创建订单和付款是两步。</p>
+  </section>
+
+  <section class="panel">
+    <h2>广州产品参考库</h2>
+    <p id="catalogInfo" class="note">正在读取产品库…</p>
+    <div class="grid">
+      <label>按产品名或主料搜索<input id="catalogQuery" placeholder="如麦乐鸡、牛肉、无糖" maxlength="100" /></label>
+      <label>分类<select id="catalogCategory"><option value="">全部分类</option></select></label>
+    </div>
+    <button id="searchCatalog" class="ghost">查询产品</button>
+    <div id="catalogResults"></div>
+    <div class="buttons"><button id="catalogPrev" class="ghost" hidden>上一页</button><button id="catalogNext" class="ghost" hidden>下一页</button></div>
+  </section>
+
+  <section class="panel">
+    <h2>订单</h2>
+    <div id="orders" class="orders"></div>
+  </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

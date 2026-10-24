@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="card">
+    <view class="card-title">后端连接</view>
+    <view class="field">
+      <text class="label">后端地址</text>
+      <input class="input" value="{{baseUrl}}" bindinput="onBase" placeholder="http://127.0.0.1:8787" placeholder-class="ph" />
+    </view>
+    <view class="field">
+      <text class="label">访问口令</text>
+      <input class="input" value="{{accessKey}}" bindinput="onKey" password placeholder="和后端 .env 里的 APP_ACCESS_KEY 一致" placeholder-class="ph" />
+    </view>
+    <view class="tag" wx:if="{{mode === 'demo'}}">演示模式 · 不会真实下单</view>
+    <view class="tag tag-danger" wx:elif="{{mode === 'live'}}">真实模式 · 会调用官方接口</view>
+    <view class="actions">
+      <button class="btn-primary" bindtap="save" disabled="{{saving}}">保存并连接</button>
+    </view>
+    <view class="actions">
+      <button class="btn-ghost" bindtap="check" disabled="{{checking}}">{{checking ? '检查中…' : '检查官方 MCP 接入'}}</button>
+    </view>
+    <view class="muted" wx:if="{{message}}">{{message}}</view>
+  </view>
+
+  <view class="card" wx:if="{{integration}}">
+    <view class="card-title">麦当劳官方接入</view>
+    <view>{{integration.summary}}</view>
+    <view class="muted">下一步：{{integration.nextStep}}</view>
+    <view class="row" wx:for="{{integration.features}}" wx:key="id"><text>{{item.name}}</text><text class="muted">{{item.statusText}}</text></view>
+    <view class="muted">{{integration.notice}}</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">手机实测要改什么</view>
+    <view class="muted">1. 后端 .env 里设 HOST=0.0.0.0，重启服务。</view>
+    <view class="muted">2. 这里把地址换成电脑的局域网地址，例如 http://192.168.1.20:8787。</view>
+    <view class="muted">3. 手机和电脑连同一个 Wi-Fi，Windows 防火墙放行该端口。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">开发时的两个开关</view>
+    <view class="muted">1. 开发者工具「详情 → 本地设置」勾选「不校验合法域名」，否则 http://127.0.0.1 会被拦。</view>
+    <view class="muted">2. 想改默认地址和口令，可以在 miniprogram 目录复制一份 config.local.js 覆盖，不必每次手填。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">安全提醒</view>
+    <view class="muted">麦当劳 Token 和 AI Key 只放在后端 .env 里，小程序不保存它们。真实模式下后端口令别用默认值。</view>
+  </view>
+</view>

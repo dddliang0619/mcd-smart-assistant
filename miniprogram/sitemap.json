@@ -1,0 +1,1 @@
+{ "desc": "点餐小助手的页面索引配置", "rules": [{ "action": "disallow", "page": "*" }] }

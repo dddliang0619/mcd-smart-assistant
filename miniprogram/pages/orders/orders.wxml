@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="notice" wx:if="{{message}}"><text>{{message}}</text></view>
+
+  <view class="empty" wx:if="{{loaded && !list.length}}">
+    <text>还没有订单记录。</text>
+    <view class="actions"><button class="btn-ghost" bindtap="goHome">去点一份</button></view>
+  </view>
+
+  <view class="card" wx:for="{{list}}" wx:key="quoteId">
+    <view class="row">
+      <text class="card-title">¥{{item.total || '—'}}</text>
+      <text class="tag {{item.warn ? 'tag-danger' : ''}}">{{item.statusText}}</text>
+    </view>
+    <view class="muted" wx:if="{{item.demo}}">演示记录 · 未真实下单</view>
+    <view class="row" wx:if="{{item.orderId}}"><text class="muted">订单号</text><text>{{item.orderId}}</text></view>
+    <view class="row" wx:if="{{item.storeName}}"><text class="muted">门店</text><text>{{item.storeName}}</text></view>
+    <view class="row" wx:if="{{item.orderStatus}}"><text class="muted">状态</text><text>{{item.orderStatus}}</text></view>
+    <view class="row" wx:if="{{item.pickupCode}}"><text class="muted">取餐码</text><text>{{item.pickupCode}}</text></view>
+    <view class="muted" wx:if="{{item.timeText}}">创建于 {{item.timeText}}</view>
+    <view class="muted warn-text" wx:if="{{item.warn}}">{{item.message}}</view>
+
+    <view class="actions" wx:if="{{!item.demo}}">
+      <button class="btn-ghost" data-id="{{item.quoteId}}" bindtap="refreshItem">查询官方状态</button>
+    </view>
+    <view class="actions" wx:if="{{item.payUrl}}">
+      <button class="btn-primary" data-url="{{item.payUrl}}" bindtap="copyPayUrl">复制支付链接</button>
+    </view>
+  </view>
+
+  <view class="actions"><button class="btn-ghost" bindtap="load">刷新列表</button></view>
+</view>

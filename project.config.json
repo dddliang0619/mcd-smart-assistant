@@ -1,0 +1,9 @@
+{
+  "description": "个人用自然语言点餐助手",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "personal-order-assistant",
+  "setting": { "es6": true, "enhance": true, "postcss": true, "minified": true, "urlCheck": false },
+  "condition": {}
+}

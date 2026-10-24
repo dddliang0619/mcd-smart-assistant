@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+.runtime/
+miniprogram/config.local.js
+project.private.config.json
+*.log
+node_modules/
+*.zip
+*.skill
+*.local.json
+confirmation.json
+request.json

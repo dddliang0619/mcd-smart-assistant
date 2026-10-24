@@ -1,0 +1,93 @@
+<view class="page">
+  <view class="notice" wx:if="{{online === false}}">
+    <text>还没连上后端。先启动电脑上的服务（npm start），再到「连接设置」核对地址和口令。</text>
+  </view>
+  <view class="notice notice-demo" wx:elif="{{mode === 'demo'}}">
+    <text>{{integration ? integration.summary : '官方 MCP 待接入'}}。当前为配餐演示，金额是模拟价。</text>
+  </view>
+  <view class="catalog-note" wx:if="{{catalogText}}">{{catalogText}}。门店供应待核验。</view>
+  <view class="card">
+    <view class="card-title">麦当劳 · 按预算配好这一餐</view>
+    <view>选门店位置，告诉我人数和预算，比较多种搭配。</view>
+    <view class="muted">{{mode === 'live' ? '查询所选门店的官方套餐与可用优惠，分别核算最终价格。' : (mcpChecked ? '官方 MCP 已连通，完成 AI 配餐配置后启用门店套餐与优惠核价。' : '接入官方 MCP 后，将直接查询门店套餐、可用优惠和优惠后价格。')}}</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">想吃什么，直接说</view>
+    <textarea
+      class="ask"
+      value="{{text}}"
+      bindinput="onText"
+      maxlength="2000"
+      placeholder="比如：一个人吃，30元以内，不吃辣，要汉堡和无糖饮料"
+      placeholder-class="ph"
+      auto-height
+    />
+    <view class="hint" bindtap="fillExample">用示例填一下</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">怎么吃</view>
+    <view class="segmented">
+      <view class="segment {{fulfillment === 'pickup' ? 'segment-on' : ''}}" data-value="pickup" bindtap="switchFulfillment">到店自取</view>
+      <view class="segment {{fulfillment === 'delivery' ? 'segment-on' : ''}}" data-value="delivery" bindtap="switchFulfillment">外送</view>
+    </view>
+
+    <view class="field">
+      <text class="label">{{fulfillment === 'delivery' ? '送达位置' : '你在哪儿'}}</text>
+      <input class="input" value="{{location}}" bindinput="onLocation" maxlength="300"
+        placeholder="{{fulfillment === 'delivery' ? '城市 + 小区或地标，会用来匹配可配送门店' : '城市 + 附近地标或门店名'}}" placeholder-class="ph" />
+    </view>
+
+    <view class="field">
+      <text class="label">预算上限</text>
+      <input class="input" value="{{budget}}" bindinput="onBudget" type="digit"
+        placeholder="不填就是不限（元）" placeholder-class="ph" />
+    </view>
+    <view class="budget-options">
+      <view class="budget-chip {{budget == item ? 'budget-on' : ''}}" wx:for="{{budgets}}" wx:key="*this"
+        data-value="{{item}}" bindtap="pickBudget">¥{{item}}</view>
+    </view>
+    <view class="field">
+      <text class="label">用餐人数</text>
+      <input class="input" value="{{people}}" bindinput="onPeople" type="number" placeholder="不填则从需求识别，默认1人（最多8人）" placeholder-class="ph" />
+    </view>
+    <view class="muted">预算比的是最后要付的总价：外送会把配送费也算进去。</view>
+  </view>
+
+  <view class="actions">
+    <button class="btn-primary" bindtap="generate" disabled="{{loading}}">
+      {{loading ? '正在配餐…' : (quotes.length ? '换一批搭配' : '看看多种搭配')}}
+    </button>
+  </view>
+
+  <view id="recommendations">
+    <view class="card proposal" wx:for="{{quotes}}" wx:key="id">
+      <view class="row"><text class="card-title">{{item.title}}</text><text class="total">¥{{item.total}}</text></view>
+      <view class="muted">{{item.people}}人 · {{item.demo ? '模拟预算价' : '官方门店核价'}} · {{item.fulfillment}}</view>
+      <view class="muted">{{item.storeName}}</view>
+      <view class="proposal-line" wx:for="{{item.lines}}" wx:for-item="line" wx:key="code">{{line.name}} × {{line.quantity}}</view>
+      <view class="muted" wx:if="{{item.nutritionSummary}}">{{item.nutritionSummary}}</view>
+      <view class="actions"><button class="btn-ghost" data-index="{{index}}" bindtap="selectQuote">选择这份搭配</button></view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{quote}}">
+    <view class="card-title">刚配好的方案</view>
+    <view class="row">
+      <text class="muted">{{quote.fulfillment}}</text>
+      <text class="total">¥{{quote.total}}</text>
+    </view>
+    <view class="muted">{{quote.storeName}}</view>
+    <view class="actions">
+      <button class="btn-ghost" bindtap="goQuote">去核对并确认</button>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{messages.length}}">
+    <view class="card-title">对话</view>
+    <view class="msg {{item.role}}" wx:for="{{messages}}" wx:key="index">
+      <text class="{{item.error ? 'msg-error' : ''}}">{{item.text}}</text>
+    </view>
+  </view>
+</view>

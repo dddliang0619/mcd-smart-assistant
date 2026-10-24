@@ -1,0 +1,86 @@
+page {
+  background: #f6f6f6;
+  color: #222222;
+  font-size: 30rpx;
+  line-height: 1.6;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 20rpx 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.muted {
+  color: #8a8a8a;
+  font-size: 26rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.divider {
+  height: 1rpx;
+  background: #eeeeee;
+  margin: 20rpx 0;
+}
+
+.btn-primary {
+  background: #db0007;
+  color: #ffffff;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.btn-primary[disabled] {
+  background: #e0a0a2;
+  color: #fff8f8;
+}
+
+.btn-ghost {
+  background: #ffffff;
+  color: #db0007;
+  border: 2rpx solid #db0007;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  background: #fff3cd;
+  color: #8a6100;
+}
+
+.tag-danger {
+  background: #fde8e8;
+  color: #b00005;
+}
+
+.total {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #db0007;
+}
+
+.empty {
+  text-align: center;
+  color: #9a9a9a;
+  padding: 80rpx 40rpx;
+  font-size: 28rpx;
+}

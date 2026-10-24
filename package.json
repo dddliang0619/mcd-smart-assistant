@@ -1,0 +1,14 @@
+{
+  "name": "mcd-smart-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.15" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "skill": "node --env-file-if-exists=.env scripts/skill.mjs",
+    "import:catalog": "node scripts/import-catalog.mjs"
+  }
+}

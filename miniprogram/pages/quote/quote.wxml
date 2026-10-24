@@ -1,0 +1,98 @@
+<view class="page">
+  <view class="empty" wx:if="{{!view}}">
+    <text>{{message || '没有待确认的方案。'}}</text>
+    <view class="actions"><button class="btn-ghost" bindtap="backHome">回首页</button></view>
+  </view>
+
+  <block wx:else>
+    <view class="notice notice-demo" wx:if="{{view.demo}}">
+      <text>广州产品库演示搭配：金额是开发用模拟价，不是广州门店售价；确认后只生成演示记录。</text>
+    </view>
+    <view class="notice" wx:if="{{changed}}">
+      <text>门店报价变了，下面是更新后的方案，请再看一遍。</text>
+    </view>
+
+    <view class="card">
+      <view class="card-title">{{view.title}} · {{view.people}}人</view>
+      <view class="row" wx:for="{{view.lines}}" wx:key="code">
+        <text>{{item.name}} × {{item.quantity}}</text>
+        <text>¥{{item.subtotal}}</text>
+      </view>
+      <view class="divider"></view>
+      <view class="row"><text class="muted">餐品小计</text><text>¥{{view.foodSubtotal}}</text></view>
+      <view class="row" wx:if="{{view.delivery !== '0.00'}}">
+        <text class="muted">配送费</text><text>¥{{view.delivery}}</text>
+      </view>
+      <view class="row" wx:if="{{view.discount !== '0.00'}}">
+        <text class="muted">优惠</text><text>-¥{{view.discount}}</text>
+      </view>
+      <view class="row">
+        <text class="card-title">应付</text>
+        <text class="total">¥{{view.total}}</text>
+      </view>
+      <view class="muted">{{view.demo ? '金额为模拟预算价；门店供应和售价未核验。' : '金额来自所选门店官方计价接口。'}}</view>
+      <view class="muted" wx:if="{{view.nutritionSummary}}">{{view.nutritionSummary}}，为历史资料参考。</view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">{{view.fulfillment}}</view>
+      <view wx:if="{{view.storeName}}">
+        <view>{{view.storeName}}</view>
+        <view class="muted">{{view.storeAddress}}</view>
+      </view>
+      <view wx:if="{{view.destination}}">
+        <view class="muted">收货地址</view>
+        <view>{{view.destination}}</view>
+      </view>
+      <view class="muted" wx:if="{{view.note}}">{{view.note}}</view>
+    </view>
+
+    <view class="card" wx:if="{{view.takeWays.length}}">
+      <view class="card-title">取餐方式</view>
+      <view class="option {{takeWayCode === item.code ? 'option-on' : ''}}"
+        wx:for="{{view.takeWays}}" wx:key="code"
+        data-code="{{item.code}}" bindtap="pickTakeWay">
+        <text>{{item.name}}</text>
+      </view>
+      <view class="muted">{{view.demo ? '这里是模拟取餐方式。' : '选项来自官方返回，第一版不支持改动餐品参数。'}}</view>
+    </view>
+
+
+
+    <view class="card" wx:if="{{!attempt}}">
+      <view class="muted">方案 {{view.expiresAtText}} 前有效，确认时后端会再核一次价。</view>
+      <view class="actions">
+        <button class="btn-primary" bindtap="submit" disabled="{{submitting}}">
+          {{submitting ? '正在提交…' : '确认下单'}}
+        </button>
+      </view>
+      <view class="muted">确认只提交这份报价编号，前端改不了金额和餐品。创建订单和付款是两步，拿到订单号不代表已经付款。</view>
+    </view>
+
+    <view class="card result" wx:if="{{attempt}}">
+      <view class="card-title">提交结果</view>
+      <view class="tag {{attempt.status === 'unknown' ? 'tag-danger' : ''}}">{{attempt.status === 'created' ? '已创建' : (attempt.status === 'unknown' ? '待核实' : attempt.status)}}</view>
+      <view wx:if="{{order}}">
+        <view class="row"><text class="muted">订单号</text><text>{{order.orderId}}</text></view>
+        <view class="row" wx:if="{{order.storeName}}"><text class="muted">门店</text><text>{{order.storeName}}</text></view>
+        <view class="row" wx:if="{{order.total}}"><text class="muted">金额</text><text>¥{{order.total}}</text></view>
+        <view class="row"><text class="muted">状态</text><text>{{order.orderStatus}}</text></view>
+        <view class="row" wx:if="{{order.pickupCode}}"><text class="muted">取餐码</text><text>{{order.pickupCode}}</text></view>
+      </view>
+      <view class="muted" wx:if="{{message}}">{{message}}</view>
+      <view class="actions" wx:if="{{order && order.payUrl}}">
+        <button class="btn-primary" bindtap="copyPayUrl">复制官方支付链接</button>
+      </view>
+      <view class="actions">
+        <button class="btn-ghost" bindtap="refresh" disabled="{{refreshing}}">
+          {{refreshing ? '查询中…' : '查询官方订单状态'}}
+        </button>
+      </view>
+      <view class="muted">付款请在麦当劳官方渠道完成。取餐信息只会照官方返回值显示，不会自己生成取餐码。</view>
+    </view>
+
+    <view class="actions" wx:if="{{attempt}}">
+      <button class="btn-ghost" bindtap="backHome">再点一份</button>
+    </view>
+  </block>
+</view>

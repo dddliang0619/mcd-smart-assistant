@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/quote/quote",
+    "pages/orders/orders",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "backgroundColor": "#f6f6f6",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#db0007",
+    "navigationBarTitleText": "点餐小助手",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#db0007",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "点餐" },
+      { "pagePath": "pages/orders/orders", "text": "我的订单" },
+      { "pagePath": "pages/settings/settings", "text": "连接设置" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

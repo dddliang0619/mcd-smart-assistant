@@ -1,0 +1,11 @@
+{
+  "text": "一个人吃，30元以内，不吃辣，想要汉堡和无糖饮料",
+  "context": {
+    "fulfillment": "pickup",
+    "location": "广州天河区",
+    "budget": 30,
+    "people": 1,
+    "optionCount": 3,
+    "mealPeriod": "regular"
+  }
+}
