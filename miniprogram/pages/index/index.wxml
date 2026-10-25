@@ -1,6 +1,6 @@
 <view class="page">
   <view class="notice" wx:if="{{online === false}}">
-    <text>还没连上后端。先启动电脑上的服务（npm start），再到「连接设置」核对地址和口令。</text>
+    <text>还没连上点餐服务。请到「账户 → 服务设置」检查连接。</text>
   </view>
   <view class="notice notice-demo" wx:elif="{{mode === 'demo'}}">
     <text>{{integration ? integration.summary : '官方 MCP 待接入'}}。当前为配餐演示，金额是模拟价。</text>
@@ -9,7 +9,7 @@
   <view class="card">
     <view class="card-title">麦当劳 · 按预算配好这一餐</view>
     <view>选门店位置，告诉我人数和预算，比较多种搭配。</view>
-    <view class="muted">{{mode === 'live' ? '查询所选门店的官方套餐与可用优惠，分别核算最终价格。' : (mcpChecked ? '官方 MCP 已连通，完成 AI 配餐配置后启用门店套餐与优惠核价。' : '接入官方 MCP 后，将直接查询门店套餐、可用优惠和优惠后价格。')}}</view>
+    <view class="muted">{{mode === 'live' ? '检索所选门店完整菜单，比较套餐、随心配、小食拼盘和单点组合，按实际组成核价。' : (mcpChecked ? '官方 MCP 已连通，完成 AI 配餐配置后启用门店套餐与优惠核价。' : '接入官方 MCP 后，将直接查询门店套餐、可用优惠和优惠后价格。')}}</view>
   </view>
 
   <view class="card">
@@ -19,11 +19,26 @@
       value="{{text}}"
       bindinput="onText"
       maxlength="2000"
-      placeholder="比如：一个人吃，30元以内，不吃辣，要汉堡和无糖饮料"
+      placeholder="比如：40元内，只吃小吃不要汉堡，饮料换普通可乐，不要纯悦"
       placeholder-class="ph"
       auto-height
     />
     <view class="hint" bindtap="fillExample">用示例填一下</view>
+    <view wx:if="{{mode === 'live'}}">
+      <view class="label preference-label">今天想怎么搭</view>
+      <view class="budget-options">
+        <view class="budget-chip {{mealStyle === 'any' ? 'budget-on' : ''}}" data-value="any" bindtap="pickMealStyle">都考虑</view>
+        <view class="budget-chip {{mealStyle === 'snacks' ? 'budget-on' : ''}}" data-value="snacks" bindtap="pickMealStyle">只吃小吃</view>
+        <view class="budget-chip {{mealStyle === 'noBurger' ? 'budget-on' : ''}}" data-value="noBurger" bindtap="pickMealStyle">不要汉堡</view>
+      </view>
+      <view class="label">饮料偏好</view>
+      <view class="budget-options">
+        <view class="budget-chip {{drinkPreference === 'any' ? 'budget-on' : ''}}" data-value="any" bindtap="pickDrink">按需求搭配</view>
+        <view class="budget-chip {{drinkPreference === 'coke' ? 'budget-on' : ''}}" data-value="coke" bindtap="pickDrink">普通可乐</view>
+        <view class="budget-chip {{drinkPreference === 'sugarFreeCoke' ? 'budget-on' : ''}}" data-value="sugarFreeCoke" bindtap="pickDrink">无糖可乐</view>
+        <view class="budget-chip {{drinkPreference === 'none' ? 'budget-on' : ''}}" data-value="none" bindtap="pickDrink">不要饮料</view>
+      </view>
+    </view>
   </view>
 
   <view class="card">
@@ -53,6 +68,12 @@
       <input class="input" value="{{people}}" bindinput="onPeople" type="number" placeholder="不填则从需求识别，默认1人（最多8人）" placeholder-class="ph" />
     </view>
     <view class="muted">预算比的是最后要付的总价：外送会把配送费也算进去。</view>
+    <view class="label preference-label">展示几份方案</view>
+    <view class="budget-options">
+      <view class="budget-chip {{optionCount === 3 ? 'budget-on' : ''}}" data-value="3" bindtap="pickCount">3份</view>
+      <view class="budget-chip {{optionCount === 5 ? 'budget-on' : ''}}" data-value="5" bindtap="pickCount">5份</view>
+    </view>
+    <view class="muted" wx:if="{{mode === 'live'}}">展示数量不限制菜单检索范围。套餐供应和优惠以所选门店、时段及官方接口为准。</view>
   </view>
 
   <view class="actions">
@@ -62,11 +83,14 @@
   </view>
 
   <view id="recommendations">
+    <view class="card" wx:if="{{loading}}"><view>正在查菜单、筛选并核价 · 已等待 {{elapsedSeconds}} 秒</view><view class="muted">首次查询需要读取官方数据；更换偏好时会复用短时菜单缓存，最终价格重新核算。</view></view>
+    <view class="card" wx:if="{{coverageText}}"><view>{{coverageText}}</view><view class="muted">{{performanceText}}检索范围为当前门店和取餐方式；候选逐份核价。</view></view>
     <view class="card proposal" wx:for="{{quotes}}" wx:key="id">
       <view class="row"><text class="card-title">{{item.title}}</text><text class="total">¥{{item.total}}</text></view>
       <view class="muted">{{item.people}}人 · {{item.demo ? '模拟预算价' : '官方门店核价'}} · {{item.fulfillment}}</view>
       <view class="muted">{{item.storeName}}</view>
       <view class="proposal-line" wx:for="{{item.lines}}" wx:for-item="line" wx:key="code">{{line.name}} × {{line.quantity}}</view>
+      <view class="composition" wx:if="{{item.note}}">{{item.note}}</view>
       <view class="muted" wx:if="{{item.nutritionSummary}}">{{item.nutritionSummary}}</view>
       <view class="actions"><button class="btn-ghost" data-index="{{index}}" bindtap="selectQuote">选择这份搭配</button></view>
     </view>

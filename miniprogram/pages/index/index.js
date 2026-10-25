@@ -1,7 +1,7 @@
 const api = require('../../utils/api.js');
 const format = require('../../utils/format.js');
 
-const EXAMPLE = '一个人吃，30元以内，不吃辣，要汉堡和无糖饮料，在附近门店自取。';
+const EXAMPLE = '一个人吃，40元以内，不要汉堡，只想吃小吃，饮料要普通可乐，不要纯悦，在附近门店自取。';
 
 Page({
   data: {
@@ -12,6 +12,12 @@ Page({
     people: '',
     budgets: [15, 20, 30, 50, 80],
     quotes: [],
+    mealStyle: 'any',
+    drinkPreference: 'any',
+    optionCount: 3,
+    elapsedSeconds: 0,
+    coverageText: '',
+    performanceText: '',
     catalogText: '',
     loading: false,
     messages: [],
@@ -58,6 +64,10 @@ Page({
   },
   onPeople(event) { this.setData({ people: event.detail.value }); },
   pickBudget(event) { this.setData({ budget: String(event.currentTarget.dataset.value) }); },
+  pickMealStyle(event) { this.setData({ mealStyle: event.currentTarget.dataset.value }); },
+  pickDrink(event) { this.setData({ drinkPreference: event.currentTarget.dataset.value }); },
+  pickCount(event) { this.setData({ optionCount: Number(event.currentTarget.dataset.value) }); },
+  onUnload() { clearInterval(this.loadingTimer); },
   selectQuote(event) {
     const quote = (getApp().globalData.quotes || [])[Number(event.currentTarget.dataset.index)];
     if (!quote) return;
@@ -113,8 +123,9 @@ Page({
     app.globalData.quotes = [];
 
     const messages = this.data.messages.concat([{ role: 'user', text: text }]);
-    this.setData({ loading: true, messages: messages, quote: null, quotes: [] });
-    wx.showLoading({ title: '正在查菜单配餐…', mask: true });
+    this.setData({ loading: true, messages: messages, quote: null, quotes: [], elapsedSeconds: 0, coverageText: '', performanceText: '' });
+    const started = Date.now();
+    this.loadingTimer = setInterval(() => this.setData({ elapsedSeconds: Math.floor((Date.now() - started) / 1000) }), 1000);
 
     try {
       const result = await api.plan({
@@ -124,6 +135,8 @@ Page({
           fulfillment: draft.fulfillment,
           location: draft.location,
           budget: draft.budget === '' ? null : Number(draft.budget),
+          optionCount: this.data.optionCount,
+          ...(this.data.mode === 'live' ? { mealStyle: this.data.mealStyle, drinkPreference: this.data.drinkPreference } : {}),
           ...(this.data.people === '' ? {} : { people: Number(this.data.people) })
         }
       });
@@ -133,6 +146,12 @@ Page({
       const quotes = result.quotes || (result.quote ? [result.quote] : []);
       app.globalData.quotes = quotes;
       next.quotes = quotes.map(format.toQuoteView);
+      if (result.menuCoverage) {
+        const scope = result.menuCoverage;
+        next.coverageText = (scope.stores || []).map(s => s.name + '：已检索 ' + s.menuItems + ' 个官方菜单项目 / ' + s.categories.length + ' 个分类').join('；')
+          + '，核价成功 ' + scope.quotedCandidates + ' 个候选。';
+      }
+      if (result.performance) next.performanceText = '本次用时 ' + (result.performance.elapsedMs / 1000).toFixed(1) + ' 秒。';
       this.setData(next);
       if (quotes.length) wx.pageScrollTo({ selector: '#recommendations', duration: 250 });
     } catch (error) {
@@ -145,13 +164,13 @@ Page({
       if (error.statusCode === 401) {
         wx.showModal({
           title: '口令不对',
-          content: '后端拒绝了这次请求。请到「连接设置」检查访问口令是否和 .env 里的 APP_ACCESS_KEY 一致。',
+          content: '后端拒绝了这次请求。请到「账户 → 服务设置」检查访问口令。',
           confirmText: '去设置',
           success: (res) => { if (res.confirm) this.goSettings(); }
         });
       }
     } finally {
-      wx.hideLoading();
+      clearInterval(this.loadingTimer);
     }
   }
 });

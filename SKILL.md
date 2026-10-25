@@ -20,6 +20,8 @@ description: 根据人数、总预算和口味推荐麦当劳餐品，查询小�
 
 收集总预算、人数、到店自取或外送及城市/附近地标；上下文已明确的不要重复询问。外送只用官方账号已有地址。详细入参、输出含义和命令见 [references/backend-api.md](references/backend-api.md)。
 
+真实模式支持 `context.mealStyle`（`any`、`snacks`、`noBurger`）和 `context.drinkPreference`（`any`、`coke`、`sugarFreeCoke`、`none`）。只把用户明确提出的偏好填入对应字段；普通可乐、无糖可乐和不要饮料不能混用。要求冲突或官方可选子项无法满足时说明原因，不通过改方案标题来声称满足。
+
 把请求写入临时 JSON 文件，再运行：
 
 ```bash
@@ -31,6 +33,8 @@ node --env-file-if-exists=.env scripts/skill.mjs plan --input request.json
 `catalog` 是 2026-10-24 采集的广州参考资料，不等于当前门店在售菜单；未知营养值保持未知。口味、原料和过敏原推断不能作为严格饮食保证；真实模式尚不能保证逐规格热量限制。官方套餐组成、商品编码与价格以 MCP 返回为准，不承诺全局最低价。
 
 真实模式的后端会用本地只读工具 `price_default_meal` 快捷核价普通套餐，仅使用官方明确标记的默认子项。它不是官方 MCP Tool，也不满足用户指定的替换或特调要求；有此类要求时必须按完整详情匹配。AI 限流、超时或网关错误时说明查询未完成，不回退成模拟价格来冒充真实报价。
+
+新版另有本地只读工具 `price_menu_candidates`：从所选门店接口返回的完整菜单筛选候选，按详情校验实际组成并批量官方核价。`menuCoverage` 表示所选门店和时段的检索范围，不代表检索了全部城市门店或核价了每个菜单项；`performance` 仅用于解释本次耗时和查询次数。短时缓存不包含价格、地址或下单，确认前仍需再次计价。
 
 ## 用户确认后下单
 

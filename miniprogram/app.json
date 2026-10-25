@@ -13,14 +13,14 @@
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
-    "color": "#8a8a8a",
+    "color": "#8b9098",
     "selectedColor": "#db0007",
     "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/index/index", "text": "点餐" },
-      { "pagePath": "pages/orders/orders", "text": "我的订单" },
-      { "pagePath": "pages/settings/settings", "text": "连接设置" }
+      { "pagePath": "pages/index/index", "text": "点餐", "iconPath": "assets/tabbar/order-default.png", "selectedIconPath": "assets/tabbar/order-active.png" },
+      { "pagePath": "pages/orders/orders", "text": "我的订单", "iconPath": "assets/tabbar/orders-default.png", "selectedIconPath": "assets/tabbar/orders-active.png" },
+      { "pagePath": "pages/settings/settings", "text": "账户", "iconPath": "assets/tabbar/account-default.png", "selectedIconPath": "assets/tabbar/account-active.png" }
     ]
   },
   "style": "v2",

@@ -8,7 +8,8 @@ Page({
     message: '',
     checking: false,
     saving: false,
-    integration: null
+    integration: null,
+    settingsExpanded: false
   },
 
   onLoad() {
@@ -23,6 +24,12 @@ Page({
 
   onKey(event) {
     this.setData({ accessKey: event.detail.value });
+  },
+  toggleSettings() { this.setData({ settingsExpanded: !this.data.settingsExpanded }); },
+  goOrders() { wx.switchTab({ url: '/pages/orders/orders' }); },
+  goHome() { wx.switchTab({ url: '/pages/index/index' }); },
+  showHelp() {
+    wx.showModal({ title: '关于点餐助手', content: '说出人数、预算和口味，比较官方门店的套餐与小食组合。每份搭配先核价，由你确认后才提交订单。微信账户登录即将开放。', showCancel: false, confirmText: '我知道了' });
   },
 
   async probe() {

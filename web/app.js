@@ -38,12 +38,13 @@
   function renderOptions(data) {
     state.quotes = data.quotes || (data.quote ? [data.quote] : []);
     el('optionsPanel').hidden = !state.quotes.length;
-    el('optionsNotice').textContent = data.notice || (data.priceBasis === 'official' ? '每份方案均已单独经过官方计价。' : '模拟预算价，不是广州门店售价。');
+    el('optionsNotice').textContent = data.menuCoverage ? data.menuCoverage.stores.map(s => s.name + '：已检索 ' + s.menuItems + ' 个官方菜单项目').join('；') + '，核价成功 ' + data.menuCoverage.quotedCandidates + ' 个候选。用时 ' + (data.performance.elapsedMs / 1000).toFixed(1) + ' 秒。' : data.notice || (data.priceBasis === 'official' ? '每份方案均已单独经过官方计价。' : '模拟预算价，不是广州门店售价。');
     el('options').innerHTML = state.quotes.map((quote, i) => {
       const kcal = quote.nutrition && quote.nutrition.kcal;
       return '<article class="proposal"><h3>' + escapeHtml(quote.title || '配餐方案') + ' <span class="total">¥' + money(quote.total) + '</span></h3>' +
         '<p class="muted">' + (quote.people || 1) + '人 · ' + (quote.demo ? '模拟价' : '官方核价') + ' · ' + escapeHtml(quote.fulfillment) + '</p>' +
         '<ul class="lines">' + quote.lines.map(line => '<li><span>' + escapeHtml(line.name) + ' × ' + line.quantity + '</span><span>¥' + money(line.subtotal) + '</span></li>').join('') + '</ul>' +
+        (quote.note ? '<p class="muted">' + escapeHtml(quote.note) + '</p>' : '') +
         (kcal ? '<p class="muted">' + (kcal.complete ? '参考热量 ' + kcal.total : '已知部分热量 ' + kcal.knownTotal + '（资料不全）') + ' 千卡</p>' : '') +
         '<button class="ghost" data-option="' + i + '">选择这份搭配</button></article>';
     }).join('');
@@ -129,7 +130,7 @@
     el('quotePanel').hidden = true;
     el('optionsPanel').hidden = true;
     el('plan').disabled = true;
-    showAnswer('正在查询门店和菜单，可能要花十几秒…', false);
+    showAnswer('正在检索门店完整菜单，按偏好筛选候选并核算实际组成…', false);
     try {
       const data = await call('/api/plan', {
         method: 'POST',

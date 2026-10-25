@@ -7,6 +7,8 @@
 .budget-on { background: #fff0ef; color: #db0007; }
 .proposal-line { margin: 14rpx 0; font-size: 27rpx; }
 .proposal .actions { margin: 24rpx 0 0; }
+.preference-label { margin-top: 24rpx; }
+.composition { margin-top: 16rpx; font-size: 26rpx; color: #555; line-height: 1.7; }
 
 .notice {
   margin: 20rpx 24rpx 0;

@@ -27,6 +27,8 @@ for (const file of ['package.json', 'project.config.json', '.env.example', 'READ
 for (const file of ['server/catalog.mjs', 'server/recommend.mjs', 'server/demo-prices.mjs', 'server/data/guangzhou-catalog.json']) check(file, '广州产品配餐模块');
 check('server/integration.mjs', '麦当劳官方MCP接入模块');
 check('server/default-meal.mjs', '官方默认套餐核价模块');
+check('server/menu-selection.mjs', '完整菜单与套餐偏好选择模块');
+check('server/read-cache.mjs', '官方读取缓存与并发模块');
 check('start-live.cmd', 'Windows真实模式启动入口');
 
 const pkg = readJson('package.json');
@@ -45,6 +47,7 @@ if (appJson) {
   }
   for (const item of (appJson.tabBar && appJson.tabBar.list) || []) {
     if (!(appJson.pages || []).includes(item.pagePath)) problems.push(`tabBar 指向未登记的页面：${item.pagePath}`);
+    for (const key of ['iconPath', 'selectedIconPath']) if (item[key]) check(`miniprogram/${item[key]}`, '底部导航图标');
   }
 }
 for (const file of ['miniprogram/app.js', 'miniprogram/app.wxss', 'miniprogram/sitemap.json', 'miniprogram/config.js', 'miniprogram/utils/api.js']) {

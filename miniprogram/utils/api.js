@@ -26,7 +26,7 @@ function request(path, options) {
   const opts = options || {};
   const { baseUrl, accessKey } = readSettings();
   if (!baseUrl) {
-    return Promise.reject(new Error('还没有填写后端地址，请先到「连接设置」里填。'));
+    return Promise.reject(new Error('还没有填写后端地址，请先到「账户 → 服务设置」里填写。'));
   }
   return new Promise((resolve, reject) => {
     wx.request({

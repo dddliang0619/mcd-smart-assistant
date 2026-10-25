@@ -1,49 +1,43 @@
-<view class="page">
-  <view class="card">
-    <view class="card-title">后端连接</view>
-    <view class="field">
-      <text class="label">后端地址</text>
-      <input class="input" value="{{baseUrl}}" bindinput="onBase" placeholder="http://127.0.0.1:8787" placeholder-class="ph" />
+<view class="account-page">
+  <view class="profile-card">
+    <view class="profile-top">
+      <view class="avatar"><image src="/assets/tabbar/account-active.png" mode="aspectFit" /></view>
+      <view class="profile-copy"><view class="profile-name">欢迎来到点餐助手</view><view class="profile-subtitle">每一餐，都按你的喜好来</view></view>
+      <view class="login-state">未登录</view>
     </view>
-    <view class="field">
-      <text class="label">访问口令</text>
-      <input class="input" value="{{accessKey}}" bindinput="onKey" password placeholder="和后端 .env 里的 APP_ACCESS_KEY 一致" placeholder-class="ph" />
+    <view class="wechat-login" aria-role="button" aria-disabled="{{true}}"><view class="chat-symbol"><view></view><view></view></view><text>微信登录 · 即将开放</text></view>
+    <view class="profile-footnote">当前可直接体验点餐和查看订单</view>
+  </view>
+  <view class="quick-card">
+    <view class="quick-action" bindtap="goOrders"><view class="quick-icon"><image src="/assets/tabbar/orders-active.png" /></view><view class="quick-title">我的订单</view><view class="quick-subtitle">查看订单与取餐信息</view></view>
+    <view class="quick-separator"></view>
+    <view class="quick-action" bindtap="goHome"><view class="quick-icon"><image src="/assets/tabbar/order-active.png" /></view><view class="quick-title">今天吃什么</view><view class="quick-subtitle">按预算和口味搭一餐</view></view>
+  </view>
+  <view class="section-heading">服务与支持</view>
+  <view class="service-card">
+    <view class="service-row" bindtap="toggleSettings">
+      <view class="service-label"><view class="service-dot {{mode ? 'service-dot-online' : ''}}"></view><text>服务设置</text></view>
+      <view class="service-right"><text>{{mode ? '已连接' : '检查连接'}}</text><text class="chevron {{settingsExpanded ? 'expanded' : ''}}">›</text></view>
     </view>
-    <view class="tag" wx:if="{{mode === 'demo'}}">演示模式 · 不会真实下单</view>
-    <view class="tag tag-danger" wx:elif="{{mode === 'live'}}">真实模式 · 会调用官方接口</view>
-    <view class="actions">
-      <button class="btn-primary" bindtap="save" disabled="{{saving}}">保存并连接</button>
+    <view class="service-row" bindtap="showHelp"><text>使用帮助与关于</text><text class="chevron">›</text></view>
+  </view>
+  <view wx:if="{{settingsExpanded}}">
+    <view class="card connection-card">
+      <view class="card-title">后端连接</view>
+      <view class="field"><text class="label">后端地址</text><input class="input" value="{{baseUrl}}" bindinput="onBase" placeholder="http://127.0.0.1:8787" placeholder-class="ph" /></view>
+      <view class="field"><text class="label">访问口令</text><input class="input" value="{{accessKey}}" bindinput="onKey" password placeholder="填写后端访问口令" placeholder-class="ph" /></view>
+      <view class="tag" wx:if="{{mode === 'demo'}}">演示模式 · 不会真实下单</view>
+      <view class="tag tag-danger" wx:elif="{{mode === 'live'}}">官方门店实时配餐</view>
+      <view class="actions"><button class="btn-primary" bindtap="save" disabled="{{saving}}">保存并连接</button></view>
+      <view class="actions"><button class="btn-ghost" bindtap="check" disabled="{{checking}}">{{checking ? '检查中…' : '检查麦当劳服务'}}</button></view>
+      <view class="connection-message" wx:if="{{message}}">{{message}}</view>
     </view>
-    <view class="actions">
-      <button class="btn-ghost" bindtap="check" disabled="{{checking}}">{{checking ? '检查中…' : '检查官方 MCP 接入'}}</button>
+    <view class="card" wx:if="{{integration}}">
+      <view class="card-title">官方服务状态</view><view>{{integration.summary}}</view>
+      <view class="muted" wx:if="{{integration.aiConfigured}}">AI 服务：{{integration.aiHost}} · {{integration.aiModel}}</view>
+      <view class="row" wx:for="{{integration.features}}" wx:key="id"><text>{{item.name}}</text><text class="muted">{{item.statusText}}</text></view>
+      <view class="muted">{{integration.notice}}</view>
     </view>
-    <view class="muted" wx:if="{{message}}">{{message}}</view>
   </view>
-
-  <view class="card" wx:if="{{integration}}">
-    <view class="card-title">麦当劳官方接入</view>
-    <view>{{integration.summary}}</view>
-    <view class="muted" wx:if="{{integration.aiConfigured}}">AI 服务：{{integration.aiHost}} · {{integration.aiModel}}</view>
-    <view class="muted">下一步：{{integration.nextStep}}</view>
-    <view class="row" wx:for="{{integration.features}}" wx:key="id"><text>{{item.name}}</text><text class="muted">{{item.statusText}}</text></view>
-    <view class="muted">{{integration.notice}}</view>
-  </view>
-
-  <view class="card">
-    <view class="card-title">手机实测要改什么</view>
-    <view class="muted">1. 后端 .env 里设 HOST=0.0.0.0，重启服务。</view>
-    <view class="muted">2. 这里把地址换成电脑的局域网地址，例如 http://192.168.1.20:8787。</view>
-    <view class="muted">3. 手机和电脑连同一个 Wi-Fi，Windows 防火墙放行该端口。</view>
-  </view>
-
-  <view class="card">
-    <view class="card-title">开发时的两个开关</view>
-    <view class="muted">1. 开发者工具「详情 → 本地设置」勾选「不校验合法域名」，否则 http://127.0.0.1 会被拦。</view>
-    <view class="muted">2. 想改默认地址和口令，可以在 miniprogram 目录复制一份 config.local.js 覆盖，不必每次手填。</view>
-  </view>
-
-  <view class="card">
-    <view class="card-title">安全提醒</view>
-    <view class="muted">麦当劳 Token 和 AI Key 只放在后端 .env 里，小程序不保存它们。真实模式下后端口令别用默认值。</view>
-  </view>
+  <view class="account-footer">好好吃饭，轻松选择</view>
 </view>

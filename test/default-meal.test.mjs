@@ -48,7 +48,8 @@ test('默认套餐工具从门店菜单取码、读取详情再官方核价，�
   const orders = new OrderService({ mode: 'live', mcp });
   const agent = new OrderingAgent({ mcp, orders, config: { aiBaseUrl: 'https://compatible.example/v1', aiModel: 'test', aiKey: 'test' }, fetchImpl: async (_, options) => {
     const body = JSON.parse(options.body);
-    assert.ok(body.tools.some(t => t.function.name === 'price_default_meal'));
+    if (body.tool_choice) assert.deepEqual(body.tools.map(t => t.function.name), [body.tool_choice.function.name]);
+    else assert.ok(body.tools.some(t => t.function.name === 'price_default_meal'));
     let tool_calls;
     if (round++ === 0) tool_calls = [call('query-nearby-stores', {}, 'store'), call('query-meals', { storeCode: 'TEST-STORE' }, 'menu')];
     else if (round === 2) tool_calls = [call('price_default_meal', { storeCode: 'TEST-STORE', beType: 1, orderType: 1, productCode: 'TEST-COMBO', quantity: 1 }, 'default')];
